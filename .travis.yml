@@ -16,6 +16,7 @@ script:
 
   # First run
   - ansible-playbook -i inventory test.yml --connection=local --sudo
+  - ansible-playbook -i inventory test.yml --connection=local --sudo
 
   # Second run Idempotence test
   - >
@@ -28,3 +29,4 @@ script:
   - ps -ef | grep [l]ogstash-forwarder || exit 1
 
 logstash_forwarder_enabled: yes
+logstash_grant_permissions: []

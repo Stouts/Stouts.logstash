@@ -12,4 +12,5 @@
 
 - name: logstash-configure | Ensure the service is started
   service: name=logstash-forwarder state=started enabled=yes
+  changed_when: False
   tags: [logstash, logstash-configure]
