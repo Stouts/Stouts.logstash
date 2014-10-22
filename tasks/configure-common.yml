@@ -1,0 +1,15 @@
+---
+
+- name: logstash-configure | Setup config directory
+  file: state=directory path={{logstash_confdir}} owner={{logstash_user}} group={{logstash_group}}
+
+- name: logstash-configure | Copy SSL files pt.1
+  copy: src={{logstash_ssl_cert_file}} dest={{logstash_confdir}}/logstash.crt owner={{logstash_user}} group={{logstash_group}} mode=0644
+
+- name: logstash-configure | Copy SSL files pt.2
+  copy: src={{logstash_ssl_key_file}} dest={{logstash_confdir}}/logstash.key owner={{logstash_user}} group={{logstash_group}} mode=0600
+
+- name: logstash-configure | Grant permissions to read
+  command: setfacl -m u:{{logstash_user}}:r {{item}}
+  with_items: logstash_grant_permissions
+  changed_when: False

@@ -1,5 +1,5 @@
 ---
 
 - include: logstash.yml
-  when: logstash_enabled
+  when: logstash_enabled or logstash_forwarder_enabled
   tags: [logstash]

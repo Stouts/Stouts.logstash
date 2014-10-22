@@ -8,5 +8,13 @@
   when: ansible_os_family == 'Debian'
   tags: [logstash, logstash-install]
 
-- include: configure.yml
+- include: configure-common.yml
+  tags: [logstash, logstash-configure]
+
+- include: configure-server.yml
+  when: logstash_enabled
+  tags: [logstash, logstash-configure]
+
+- include: configure-forwarder.yml
+  when: logstash_forwarder_enabled
   tags: [logstash, logstash-configure]

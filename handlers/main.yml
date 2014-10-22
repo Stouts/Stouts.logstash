@@ -5,3 +5,6 @@
 
 - name: logstash-web restart
   service: name=logstash-web state=restarted
+
+- name: logstash-forwarder restart
+  service: name=logstash-forwarder state=restarted
