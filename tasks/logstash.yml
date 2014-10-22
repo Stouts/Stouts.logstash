@@ -1,7 +1,7 @@
 ---
 
 - name: Ensure that a logstash user is exist
-  user: name=logstash system=yes groups=adm group=logstash
+  user: name=logstash system=yes groups=adm
   notify: [ logstash restart ]
 
 - include: install.deb.yml
