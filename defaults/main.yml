@@ -64,7 +64,7 @@ logstash_config_outputs:
 # --------------------------
 logstash_forwarder_servers: [ "127.0.0.1:5000" ]
 logstash_forwarder_network:
-  servers: logstash_forwarder_servers
+  servers: "{{logstash_forwarder_servers}}"
   timeout: 15
   "ssl ca": "{{logstash_confdir}}/logstash.crt"
 logstash_forwarder_files:
