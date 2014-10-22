@@ -24,4 +24,4 @@ script:
     && (echo 'Idempotence test: pass' && exit 0)
     || (echo 'Idempotence test: fail' && exit 1)
 
-- ps -ef | grep [l]ogstash || exit 1
+  - ps -ef | grep [l]ogstash || exit 1
