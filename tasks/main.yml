@@ -1,0 +1,5 @@
+---
+
+- include: logstash.yml
+  when: logstash_enabled
+  tags: [logstash]

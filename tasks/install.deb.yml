@@ -1,0 +1,31 @@
+---
+
+- name: logstash-install | Add keys
+  apt_key: url=http://packages.elasticsearch.org/GPG-KEY-elasticsearch id=D88E42B4
+
+- name: logstash-install | Add repositories
+  apt_repository: repo='{{item}}' update_cache=yes
+  with_items: logstash_apt_repositories
+
+- name: logstash-install | Accept Oracle license
+  shell: echo debconf shared/accepted-oracle-license-v1-1 select true | sudo debconf-set-selections; echo debconf shared/accepted-oracle-license-v1-1 seen true | sudo debconf-set-selections
+         creates=/usr/lib/jvm/java-7-oracle
+
+- name: logstash-install | Install commmon packages
+  apt: pkg={{item}}
+  with_items:
+  - acl
+  - oracle-java7-installer
+
+- name: logstash-install | Install logstash
+  apt: pkg={{item}}
+  with_items:
+  - logstash
+  - logstash-contrib
+  when: logstash_server_enabled
+
+- name: logstash-install | Install logstash forwarder
+  apt: pkg={{item}}
+  with_items:
+  - logstash-forwarder
+  when: logstash_forwarder_enabled

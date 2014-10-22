@@ -1,0 +1,45 @@
+---
+
+- name: logstash-configure | Disable logstash-web
+  service: name=logstash-web state=stopped enabled=no
+  when: not logstash_web_enabled
+  tags: [logstash-configure]
+
+- name: logstash-configure | Enable logstash-web
+  service: name=logstash-web state=started enabled=yes
+  when: logstash_web_enabled
+  tags: [logstash-configure]
+
+- name: logstash-configure | Copy SSL files pt.1
+  copy: src={{logstash_ssl_cert_file}} dest={{logstash_confdir}}/logstash.crt owner={{logstash_user}} group={{logstash_group}} mode=0644
+
+- name: logstash-configure | Copy SSL files pt.2
+  copy: src={{logstash_ssl_key_file}} dest={{logstash_confdir}}/logstash.key owner={{logstash_user}} group={{logstash_group}} mode=0600
+
+- name: logstash-configure | Setup configuration files
+  template:
+    dest: "{{logstash_confdir}}/conf.d/{{item}}"
+    group: "{{logstash_group}}"
+    owner: "{{logstash_user}}"
+    src: etc/logstash/conf.d/{{item}}.j2
+    validate: "{{logstash_home}}/bin/logstash --configtest --config %s"
+  notify: [logstash restart]
+  with_items: [ 10-inputs.conf, 30-filters.conf, 50-outputs.conf ]
+
+- name: logstash-configure | Setup syslog filters
+  template:
+    dest: "{{logstash_confdir}}/conf.d/35-syslog-filter.conf"
+    group: "{{logstash_group}}"
+    owner: "{{logstash_user}}"
+    src: etc/logstash/conf.d/35-syslog-filter.conf.j2
+    validate: "{{logstash_home}}/bin/logstash --configtest --config %s"
+  notify: [logstash restart]
+  when: logstash_syslog_filter
+
+- name: logstash-configure | Grant permissions to read
+  command: setfacl -m u:{{logstash_user}}:r {{item}}
+  with_items: logstash_grant_permissions
+  changed_when: False
+
+- service: name=logstash state=started enabled=yes
+  tags: [logstash]

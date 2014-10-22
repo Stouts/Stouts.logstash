@@ -1,0 +1,7 @@
+---
+
+- name: logstash restart
+  service: name=logstash state=restarted
+
+- name: logstash-web restart
+  service: name=logstash-web state=restarted
