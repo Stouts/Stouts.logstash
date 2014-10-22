@@ -22,7 +22,7 @@
   with_items:
   - logstash
   - logstash-contrib
-  when: logstash_server_enabled
+  when: logstash_enabled
 
 - name: logstash-install | Install logstash forwarder
   apt: pkg={{item}}
