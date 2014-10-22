@@ -2,7 +2,6 @@
 
 - name: Ensure that a logstash user is exist
   user: name=logstash system=yes groups=adm
-  notify: [ logstash restart ]
 
 - include: install.deb.yml
   when: ansible_os_family == 'Debian'
