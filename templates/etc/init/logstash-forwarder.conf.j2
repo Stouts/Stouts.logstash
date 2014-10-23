@@ -10,6 +10,7 @@ limit nofile 65536 65536
 respawn
 setgid {{logstash_user}}
 setuid {{logstash_group}}
+chdir {{logstash_forwarder_home}}
 
 exec {{logstash_forwarder_home}}/bin/logstash-forwarder -config {{logstash_confdir}}/forwarder.json -spool-size=100 -log-to-syslog
 
