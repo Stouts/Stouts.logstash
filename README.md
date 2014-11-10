@@ -57,28 +57,30 @@ logstash_grant_permissions:
 
 # Logstash inputs
 logstash_config_inputs:
-  file:
-    path: [ /var/log/syslog ]
-    type: syslog
-  lumberjack:
-    port: 5000
-    type: lumberjack
-    ssl_certificate: "{{logstash_confdir}}/logstash.crt"
-    ssl_key: "{{logstash_confdir}}/logstash.key"
+  - file:
+      path: [ /var/log/syslog ]
+      type: syslog
+  - lumberjack:
+      port: 5000
+      type: lumberjack
+      ssl_certificate: "{{logstash_confdir}}/logstash.crt"
+      ssl_key: "{{logstash_confdir}}/logstash.key"
 
 # Logstash filters
 logstash_config_filters:
-  grok:
-    type: syslog
-    pattern: "%{SYSLOGBASE}"
-  date:
-    type: syslog
-    match: ["timestamp", "MMM dd HH:mm:ss"]
+  - grok:
+      _condition: "if [type] == 'syslog'"
+      type: syslog
+      pattern: "%{SYSLOGBASE}"
+  - date:
+      _condition: "if [type] == 'syslog'"
+      type: syslog
+      match: ["timestamp", "MMM dd HH:mm:ss"]
 
 # Logstash outputs
 logstash_config_outputs:
-  elasticsearch:
-    host: localhost
+  - elasticsearch:
+      host: localhost
 
 # Logstash forwarder options
 # --------------------------
