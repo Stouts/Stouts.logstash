@@ -2,8 +2,7 @@ Stouts.logstash
 ==============
 
 [![Build Status](http://img.shields.io/travis/Stouts/Stouts.logstash.svg?style=flat-square)](https://travis-ci.org/Stouts/Stouts.logstash)
-[![Galaxy](http://img.shields.io/badge/galaxy-Stouts.logstash-blue.svg?style=flat-square)](https://galaxy.ansible.com/list#/roles/1995)
-[![Tag](http://img.shields.io/github/tag/Stouts/Stouts.logstash.svg?style=flat-square)]()
+[![Galaxy](http://img.shields.io/badge/galaxy-Stouts.logstash-blue.svg?style=flat-square)](https://galaxy.logstash.com/list#/roles/1995)
 
 Ansible role which manage [Logstash](http://www.elasticsearch.org/overview/logstash/)
 
