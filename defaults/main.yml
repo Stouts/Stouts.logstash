@@ -63,6 +63,13 @@ logstash_config_outputs:
   - elasticsearch:
       host: localhost
 
+# Logstash patterns
+logstash_config_patterns:
+  nginx: |
+    NGUSERNAME [a-zA-Z\.\@\-\+_%]+
+    NGUSER %{NGUSERNAME}
+    NGINXACCESS %{IPORHOST:clientip} %{NGUSER:ident} %{NGUSER:auth} \[%{HTTPDATE:timestamp}\] "%{WORD:verb} %{URIPATHPARAM:request} HTTP/%{NUMBER:httpversion}" %{NUMBER:response} (?:%{NUMBER:bytes}|-) (?:"(?:%{URI:referrer}|-)"|%{QS:referrer}) %{QS:agent}
+
 # Logstash forwarder options
 # --------------------------
 logstash_forwarder_servers: [ "127.0.0.1:5000" ]
@@ -71,7 +78,6 @@ logstash_forwarder_network:
   timeout: 15
   "ssl ca": "{{logstash_confdir}}/logstash.crt"
 logstash_forwarder_files:
-  -
-    paths: [ /var/log/syslog ]
+  - paths: [ /var/log/syslog ]
     fields:
       type: syslog

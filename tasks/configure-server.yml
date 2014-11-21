@@ -21,6 +21,11 @@
   with_items: [ 10-inputs.conf, 30-filters.conf, 50-outputs.conf ]
   tags: [logstash, logstash-configure]
 
+- name: logstash-configure | Setup patterns
+  template: src=pattern.j2 dest={{logstash_home}}/patterns/{{item[0]}} owner={{logstash_user}} group={{logstash_group}}
+  with_items: logstash_config_patterns.items()
+  tags: [logstash, logstash-configure]
+
 - name: logstash-configure | Ensure the service is started
   service: name=logstash state=started enabled=yes
   changed_when: False

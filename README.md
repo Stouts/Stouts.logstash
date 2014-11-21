@@ -2,7 +2,7 @@ Stouts.logstash
 ==============
 
 [![Build Status](http://img.shields.io/travis/Stouts/Stouts.logstash.svg?style=flat-square)](https://travis-ci.org/Stouts/Stouts.logstash)
-[![Galaxy](http://img.shields.io/badge/galaxy-Stouts.logstash-blue.svg?style=flat-square)](https://galaxy.logstash.com/list#/roles/1995)
+[![Galaxy](http://img.shields.io/badge/galaxy-Stouts.logstash-blue.svg?style=flat-square)](https://galaxy.ansible.com/list#/roles/1995)
 
 Ansible role which manage [Logstash](http://www.elasticsearch.org/overview/logstash/)
 
@@ -67,13 +67,14 @@ logstash_config_inputs:
 
 # Logstash filters
 logstash_config_filters:
-  - grok:
-      _condition: "if [type] == 'syslog'"
-      type: syslog
+  - grok: 
+      _condition: "if [type] == 'syslog'"             # Set condition by this way
       pattern: "%{SYSLOGBASE}"
+  - grok:
+      _condition: "else if [type] == 'nginx'"
+      pattern: "%{COMBINEDAPACHELOG}"
   - date:
       _condition: "if [type] == 'syslog'"
-      type: syslog
       match: ["timestamp", "MMM dd HH:mm:ss"]
 
 # Logstash outputs
@@ -81,16 +82,22 @@ logstash_config_outputs:
   - elasticsearch:
       host: localhost
 
+# Logstash patterns
+logstash_config_patterns:
+  nginx: |
+    NGUSERNAME [a-zA-Z\.\@\-\+_%]+
+    NGUSER %{NGUSERNAME}
+    NGINXACCESS %{IPORHOST:clientip} %{NGUSER:ident} %{NGUSER:auth} \[%{HTTPDATE:timestamp}\] "%{WORD:verb} %{URIPATHPARAM:request} HTTP/%{NUMBER:httpversion}" %{NUMBER:response} (?:%{NUMBER:bytes}|-) (?:"(?:%{URI:referrer}|-)"|%{QS:referrer}) %{QS:agent}
+
 # Logstash forwarder options
 # --------------------------
 logstash_forwarder_servers: [ "127.0.0.1:5000" ]
 logstash_forwarder_network:
-  servers: logstash_forwarder_servers
+  servers: "{{logstash_forwarder_servers}}"
   timeout: 15
   "ssl ca": "{{logstash_confdir}}/logstash.crt"
 logstash_forwarder_files:
-  -
-    paths: [ /var/log/syslog ]
+  - paths: [ /var/log/syslog ]
     fields:
       type: syslog
 ```
@@ -111,14 +118,14 @@ Example (server setup):
 
   vars:
     logstash_config_inputs:
-      file:
-        path: [ /var/log/syslog ]
-        type: syslog
-      lumberjack:
-        port: 4400
-        type: lumberjack
-        ssl_certificate: "{{logstash_confdir}}/logstash.crt"
-        ssl_key: "{{logstash_confdir}}/logstash.key"
+      - file:
+          path: [ /var/log/syslog ]
+          type: syslog
+      - lumberjack:
+          port: 4400
+          type: lumberjack
+          ssl_certificate: "{{logstash_confdir}}/logstash.crt"
+          ssl_key: "{{logstash_confdir}}/logstash.key"
 ```
 
 Example (forwarder setup):
