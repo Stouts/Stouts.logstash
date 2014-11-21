@@ -55,32 +55,31 @@ logstash_grant_permissions:
 # -----------------------
 
 # Logstash inputs
-logstash_config_inputs:
-  - file:
-      path: [ /var/log/syslog ]
-      type: syslog
-  - lumberjack:
-      port: 5000
-      type: lumberjack
-      ssl_certificate: "{{logstash_confdir}}/logstash.crt"
-      ssl_key: "{{logstash_confdir}}/logstash.key"
+logstash_config_inputs: |
+  file { path => [ "/var/log/syslog" ], type => "syslog" }
+  lumberjack {
+    port => 5000
+    type => "lumberjack"
+    ssl_certificate => "{{logstash_confdir}}/logstash.crt"
+    ssl_key => "{{logstash_confdir}}/logstash.key"
+  }
 
 # Logstash filters
-logstash_config_filters:
-  - grok: 
-      _condition: "if [type] == 'syslog'"             # Set condition by this way
-      pattern: "%{SYSLOGBASE}"
-  - grok:
-      _condition: "else if [type] == 'nginx'"
-      pattern: "%{COMBINEDAPACHELOG}"
-  - date:
-      _condition: "if [type] == 'syslog'"
-      match: ["timestamp", "MMM dd HH:mm:ss"]
+logstash_config_filters: |
+  if [type] == "syslog" {
+    grok { pattern => "%SYSLOGBASE" }
+    date { match => ["timestamp", "MMM dd HH:mm:ss"] }
+  }
+  else if [type] == "nginx-access" {
+    grok { pattern => "%{NGINXACCESS}" }
+    geoip { source => "clientip" }
+  }
 
 # Logstash outputs
-logstash_config_outputs:
-  - elasticsearch:
-      host: localhost
+logstash_config_outputs: |
+  elasticsearch {
+    host => "localhost"
+  }
 
 # Logstash patterns
 logstash_config_patterns:
@@ -117,15 +116,14 @@ Example (server setup):
     - Stouts.logstash
 
   vars:
-    logstash_config_inputs:
-      - file:
-          path: [ /var/log/syslog ]
-          type: syslog
-      - lumberjack:
-          port: 4400
-          type: lumberjack
-          ssl_certificate: "{{logstash_confdir}}/logstash.crt"
-          ssl_key: "{{logstash_confdir}}/logstash.key"
+    logstash_config_inputs: |
+      file { path => [ "/var/log/syslog" ], type => "syslog" }
+      lumberjack {
+        port => 4000
+        type => "lumberjack"
+        ssl_certificate => "{{logstash_confdir}}/logstash.crt"
+        ssl_key => "{{logstash_confdir}}/logstash.key"
+      }
 ```
 
 Example (forwarder setup):
@@ -144,14 +142,10 @@ Example (forwarder setup):
     logstash_forwarder_servers:
     - "my.server.com:5000"
     logstash_forwarder_files:
-    -
-      paths: [ /var/log/syslog ]
-      fields:
-        type: syslog
-    -
-      paths: [ /var/log/nginx/*.log ]
-      fields:
-        type: nginx
+    - paths: [ "/var/log/syslog", "/var/log/auth.log" ]
+      fields: { type: syslog }
+    - paths: [ "/usr/lib/ticketscloud/log/ticketscloud-access.log" ]
+      fields: { type: nginx-access }
 ```
 
 #### License
