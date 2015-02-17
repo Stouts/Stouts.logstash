@@ -13,9 +13,7 @@
 
 - name: logstash-install | Install commmon packages
   apt: pkg={{item}}
-  with_items:
-  - acl
-  - oracle-java7-installer
+  with_items: logstash_apt_common_pkgs
 
 - name: logstash-install | Install logstash
   apt: pkg={{item}}

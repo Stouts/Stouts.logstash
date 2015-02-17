@@ -25,11 +25,9 @@ logstash_apt_repositories:                  # These repositories will be added t
 - deb http://packages.elasticsearch.org/logstash/1.4/debian stable main
 - deb http://packages.elasticsearch.org/logstashforwarder/debian stable main
 logstash_apt_key: http://packages.elasticsearch.org/GPG-KEY-elasticsearch
-logstash_apt_pkgs:
+logstash_apt_common_pkgs:
 - acl
 - oracle-java7-installer
-- logstash
-- logstash-contrib
 
 logstash_server_enabled: yes                # Setup logstash server
 logstash_forwarder_enabled: no              # Setup logstash forwarder
