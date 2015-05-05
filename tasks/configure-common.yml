@@ -1,7 +1,7 @@
 ---
 
 - name: logstash-configure | Setup config directory
-  file: state=directory path={{logstash_confdir}} owner={{logstash_user}} group={{logstash_group}}
+  file: state=directory path={{logstash_confdir}}/conf.d owner={{logstash_user}} group={{logstash_group}}
 
 - name: logstash-configure | Copy SSL files pt.1
   copy: src={{logstash_ssl_cert_file}} dest={{logstash_confdir}}/logstash.crt owner={{logstash_user}} group={{logstash_group}} mode=0644

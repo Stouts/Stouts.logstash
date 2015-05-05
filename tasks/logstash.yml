@@ -1,7 +1,10 @@
 ---
 
 - name: Ensure that a logstash user is exist
-  user: name=logstash system=yes groups=adm
+  user: name={{logstash_user}} system=yes groups=adm
+
+- name: Ensure that a logstash home is exist
+  file: state=directory path={{logstash_home}} owner={{logstash_user}}
 
 - include: install.deb.yml
   when: ansible_os_family == 'Debian'
@@ -11,7 +14,7 @@
   tags: [logstash, logstash-configure]
 
 - include: configure-server.yml
-  when: logstash_enabled
+  when: logstash_server_enabled
   tags: [logstash, logstash-configure]
 
 - include: configure-forwarder.yml
