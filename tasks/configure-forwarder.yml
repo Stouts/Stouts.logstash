@@ -2,18 +2,12 @@
 
 
 - name: logstash-configure | Configure forwarder
-  template: src=etc/logstash/forwarder.json.j2 dest=/etc/logstash/forwarder.json
-  notify: logstash-forwarder restart
-  tags: [logstash, logstash-configure]
-
-- name: logstash-configure | Setup forwarder service
-  template: src=etc/init/logstash-forwarder.conf.j2 dest=/etc/init/logstash-forwarder.conf
+  template: src=logstash-forwarder.conf.j2 dest=/etc/logstash-forwarder.conf
   notify: logstash-forwarder restart
   tags: [logstash, logstash-configure]
 
 - name: logstash-configure | Ensure the forwarder service is started
   service: name=logstash-forwarder state=started enabled=yes
-  changed_when: False
   tags: [logstash, logstash-configure]
 
 - name: logstash-configure | Fix forwarder home

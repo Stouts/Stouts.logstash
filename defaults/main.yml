@@ -3,6 +3,7 @@
 logstash_enabled: yes                       # The role is enabled
 logstash_remove: no                         # Uninstall the role
 logstash_url: https://download.elastic.co/logstash/logstash/packages/debian/logstash_1.4.2-1-2c0f5a1_all.deb
+logstash_forwarder_url: https://download.elastic.co/logstash-forwarder/binaries/logstash-forwarder_0.4.0_amd64.deb
 
 logstash_apt_repositories:                  # These repositories will be added to system
 - ppa:webupd8team/java
