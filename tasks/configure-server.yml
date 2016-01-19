@@ -5,11 +5,13 @@
   when: not logstash_web_enabled
   changed_when: false
   tags: [logstash, logstash-configure]
+  ignore_erros: yes
 
 - name: logstash-configure | Enable logstash-web
   service: name=logstash-web state=started enabled=yes
   when: logstash_web_enabled
   tags: [logstash, logstash-configure]
+  ignore_erros: yes
 
 - name: logstash-configure | Setup configuration files
   template:
@@ -23,8 +25,8 @@
   tags: [logstash, logstash-configure]
 
 - name: logstash-configure | Setup patterns
-  template: src=pattern.j2 dest={{logstash_home}}/patterns/{{item[0]}} owner={{logstash_user}} group={{logstash_group}}
-  with_items: logstash_config_patterns.items()
+  template: src=pattern.j2 dest={{logstash_home}}/patterns/{{item.key}} owner={{logstash_user}} group={{logstash_group}}
+  with_dict: "{{ logstash_config_patterns }}"
   tags: [logstash, logstash-configure]
 
 - name: logstash-configure | Ensure the service is started

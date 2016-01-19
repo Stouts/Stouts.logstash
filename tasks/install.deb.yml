@@ -13,7 +13,7 @@
   with_items: logstash_apt_common_pkgs
 
 - name: logstash-install | Download logstash
-  get_url: url={{logstash_url}} dest={{logstash_home}}/logstash.deb
+  get_url: url={{logstash_url}} dest={{logstash_home}}/logstash.deb force=yes
   register: logstash_downloaded
 
 - name: logstash-install | Install logstash
