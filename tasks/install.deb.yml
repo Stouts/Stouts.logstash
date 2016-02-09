@@ -15,6 +15,7 @@
 - name: logstash-install | Download logstash
   get_url: url={{logstash_url}} dest={{logstash_home}}/logstash.deb
   register: logstash_downloaded
+  when: logstash_server_enabled or logstash_web_enabled
 
 - name: logstash-install | Install logstash
   apt: deb={{logstash_home}}/logstash.deb
