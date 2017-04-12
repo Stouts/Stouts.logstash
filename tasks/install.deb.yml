@@ -1,30 +1,15 @@
 ---
 
-- name: logstash-install | Add repositories
-  apt_repository: repo='{{item}}' update_cache=yes
-  with_items: logstash_apt_repositories
+- name: logstash-install | Add Elasticsearch apt key.
+  apt_key: url={{logstash_apt_key}}
 
-- name: logstash-install | Accept Oracle license
-  shell: echo debconf shared/accepted-oracle-license-v1-1 select true | sudo debconf-set-selections; echo debconf shared/accepted-oracle-license-v1-1 seen true | sudo debconf-set-selections
-         creates=/usr/lib/jvm/java-7-oracle
+- name: logstash-install | Add repository
+  apt_repository: repo='{{logstash_apt_repo}}' update_cache=yes
 
-- name: logstash-install | Install commmon packages
-  apt: pkg={{item}}
-  with_items: logstash_apt_common_pkgs
+- name: logstash-install | Install Logstash.
+  apt: name=logstash
 
-- name: logstash-install | Download logstash
-  get_url: url={{logstash_url}} dest={{logstash_home}}/logstash.deb
-  register: logstash_downloaded
-
-- name: logstash-install | Install logstash
-  apt: deb={{logstash_home}}/logstash.deb
-  when: logstash_downloaded.changed
-
-- name: logstash-install | Download logstash forwarder
-  get_url: url={{logstash_forwarder_url}} dest={{logstash_home}}/logstash-forwarder.deb
-  register: logstash_forwarder_downloaded
-  when: logstash_forwarder_enabled
-
-- name: logstash-install | Install logstash forwarder
-  apt: deb={{logstash_home}}/logstash-forwarder.deb
-  when: logstash_forwarder_downloaded.changed
+- name: logstash-install | Add Logstash user to adm group (Debian).
+  user: name=logstash group=logstash groups=adm
+  when: ansible_os_family == "Debian"
+  notify: logstash restart

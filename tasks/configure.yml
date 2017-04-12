@@ -1,0 +1,21 @@
+---
+
+- name: logstash-configure | Setup configuration files
+  template:
+    dest: "{{logstash_confdir}}/conf.d/{{item}}"
+    src: etc/logstash/conf.d/{{item}}.j2
+    validate: "{{logstash_home}}/bin/logstash --configtest --config %s"
+  notify: [logstash restart]
+  with_items: [ 10-inputs.conf, 30-filters.conf, 50-outputs.conf ]
+  tags: [logstash, logstash-configure]
+
+- name: logstash-configure | Copy SSL files pt.1
+  copy: src={{logstash_ssl_cert_file}} dest={{logstash_confdir}}/logstash.crt mode=0644
+
+- name: logstash-configure | Copy SSL files pt.2
+  copy: src={{logstash_ssl_key_file}} dest={{logstash_confdir}}/logstash.key mode=0600
+
+- name: logstash-configure | Ensure the service is started
+  service: name=logstash state=started enabled=yes
+  changed_when: False
+  tags: [logstash, logstash-configure]

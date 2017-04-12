@@ -1,39 +1,16 @@
 ---
 
 logstash_enabled: yes                       # The role is enabled
-logstash_remove: no                         # Uninstall the role
-logstash_url: https://download.elastic.co/logstash/logstash/packages/debian/logstash_1.4.2-1-2c0f5a1_all.deb
-logstash_forwarder_url: https://download.elastic.co/logstash-forwarder/binaries/logstash-forwarder_0.4.0_amd64.deb
-
-logstash_apt_repositories:                  # These repositories will be added to system
-- ppa:webupd8team/java
-
-logstash_apt_common_pkgs:
-- acl
-- oracle-java7-installer
-
-logstash_user: logstash                     # logstash user
-logstash_group: "{{logstash_user}}"         # logstash group
-
-logstash_home: /opt/logstash
-logstash_confdir: /etc/logstash
-logstash_logdir: /var/log/logstash
-
-logstash_server_enabled: yes                # Setup logstash server
-logstash_forwarder_enabled: no              # Setup logstash forwarder
-logstash_web_enabled: no                    # Setup logstash web
 
 logstash_apt_key: http://packages.elasticsearch.org/GPG-KEY-elasticsearch
+logstash_apt_repo: "deb http://packages.elasticsearch.org/logstash/2.3/debian stable main"
 
-logstash_forwarder_home: /opt/logstash-forwarder
+logstash_home: /opt/logstash
 
-# Certificates (please replace with your own files)
-logstash_ssl_cert_file: "logstash-nosafe.crt"
-logstash_ssl_key_file: "logstash-nosafe.key"
+logstash_plugins:
+- logstash-input-beats
 
-# Grant read permissions to logstash user
-logstash_grant_permissions:
-- /var/log/syslog
+logstash_confdir: /etc/logstash
 
 # Logstash server options
 # -----------------------
@@ -44,45 +21,41 @@ logstash_config_inputs: |
     path => [ "/var/log/syslog" ]
     type => "syslog"
   }
-  lumberjack {
-    port => 5000
-    type => "lumberjack"
-    ssl_certificate => "{{logstash_confdir}}/logstash.crt"
-    ssl_key => "{{logstash_confdir}}/logstash.key"
+  beats {
+    port => 5044
   }
 
 # Logstash filters
 logstash_config_filters: |
   if [type] == "syslog" {
-    grok { match => { message => "%SYSLOGBASE"  }}
-    date { match => ["timestamp", "MMM dd HH:mm:ss"] }
+    if [message] =~ /last message repeated [0-9]+ times/ {
+      drop { }
+    }
+    grok {
+      match => { "message" => "%{SYSLOGTIMESTAMP:syslog_timestamp} %{SYSLOGHOST:syslog_hostname} %{DATA:syslog_program}(?:\[%{POSINT:syslog_pid}\])?: %{GREEDYDATA:syslog_message}" }
+      add_field => [ "received_at", "%{@timestamp}" ]
+      add_field => [ "received_from", "%{host}" ]
+    }
+    syslog_pri { }
+    date {
+      match => [ "syslog_timestamp", "MMM  d HH:mm:ss", "MMM dd HH:mm:ss" ]
+    }
   }
-  else if [type] == "nginx-access" {
-    grok { match => { message => "%{NGINXACCESS}"  }}
-    geoip { source => "clientip" }
+
+  else if [type] == "nginx" {
+    grok {
+      match => { "message" => "%{COMBINEDAPACHELOG}" }
+    }
   }
 
 # Logstash outputs
 logstash_config_outputs: |
   elasticsearch {
-    host => "localhost"
+    hosts => ["http://localhost:9200"]
+    index => "%{[@metadata][beat]}-%{+YYYY.MM.dd}"
+    document_type => "%{[@metadata][type]}"
   }
 
-# Logstash patterns
-logstash_config_patterns:
-  nginx: |
-    NGUSERNAME [a-zA-Z\.\@\-\+_%]+
-    NGUSER %{NGUSERNAME}
-    NGINXACCESS %{IPORHOST:clientip} %{NGUSER:ident} %{NGUSER:auth} \[%{HTTPDATE:timestamp}\] "%{WORD:verb} %{URIPATHPARAM:request} HTTP/%{NUMBER:httpversion}" %{NUMBER:response} (?:%{NUMBER:bytes}|-) (?:"(?:%{URI:referrer}|-)"|%{QS:referrer}) %{QS:agent}
-
-# Logstash forwarder options
-# --------------------------
-logstash_forwarder_servers: [ "127.0.0.1:5000" ]
-logstash_forwarder_network:
-  servers: "{{logstash_forwarder_servers}}"
-  timeout: 15
-  "ssl ca": "{{logstash_confdir}}/logstash.crt"
-logstash_forwarder_files:
-  - paths: [ /var/log/syslog ]
-    fields:
-      type: syslog
+# Certificates (please replace with your own files)
+logstash_ssl_cert_file: "logstash-nosafe.crt"
+logstash_ssl_key_file: "logstash-nosafe.key"

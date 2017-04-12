@@ -1,0 +1,17 @@
+---
+
+- name: logstash-plugins | Get list of installed plugins.
+  command: >
+    ./bin/logstash-plugin list
+    chdir=/opt/logstash
+  register: logstash_plugins_list
+  when: logstash_plugins
+  changed_when: false
+
+- name: logstash-plugins | Install configured plugins.
+  command: >
+    ./bin/logstash-plugin install {{ item }}
+    chdir=/opt/logstash
+  with_items: "{{ logstash_plugins }}"
+  when: "item not in logstash_plugins_list.stdout"
+  notify: logstash restart

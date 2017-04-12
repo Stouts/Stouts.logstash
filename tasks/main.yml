@@ -1,9 +1,5 @@
 ---
 
 - include: logstash.yml
-  when: logstash_enabled or logstash_forwarder_enabled
-  tags: [logstash]
-
-- include: remove.yml
-  when: logstash_remove
+  when: logstash_enabled
   tags: [logstash]
